@@ -1,0 +1,15 @@
+# MEMORANDUM
+
+**To:** CISO, Université du Nord-Atlas
+**From:** Sentrya Security — detection engineering (pilot pair)
+**Date:** ____________ · **Re:** Pilot SENTINEL-U — what we recommend deploying
+
+**Recommendation.** Replace the single 3-sigma rule with a two-layer service. Layer 1: a **behavioural baseline per person** — each account is compared with its own habits for that hour of day (robust statistics that ignore old incidents in the history). Layer 2: a **joint-pattern detector** that adds the unusual *combinations* — e.g. an account whose DNS, uploads and hours are each individually normal but together are not. Both layers were measured on your eight weeks of pilot data: your current rule produces **≈135 alerts/day** and misses the DNS-tunnelling campaign entirely; our portfolio produces **≈45 incidents/day after regrouping** (inside your 50/day budget), a false-alarm rate of 0.9 % on normal hours, and catches brute-force, account takeover, night exfiltration and DNS tunnelling essentially completely.
+
+**What it will catch (measured on test weeks, purple-team exercise included).** Account takeover and night exfiltration: ~100 %. Brute force: ~90–100 %. DNS tunnelling (the CERT advisory): ~97–100 % — this is the campaign your current rule cannot see at any setting. Slow "just a little every day" exfiltration: ~2/3 of days when the Baseline-frozen guard is kept; the guard also caps a quiet insider channel at roughly 2 MB/hour — a 5 GB theft would take ~3 months and raise freeze-band alerts we can escalate on.
+
+**What it will miss — plainly.** An attacker who studies an account and imitates its habits precisely (the "mimicry" scenario) is caught almost never, by any system of this class. The protection there is not anomaly detection: allow-listing of devices, step-up authentication on new locations, DNS and egress reputation lists, and canary data. Planned legitimate changes (new employees, projects, travel, nightly backups) would generate most of the remaining false alerts; we suppress them by importing your change log (metadata only — nothing about content is ever processed), not by silencing users, and new accounts are monitored from their first hour with a group-level baseline.
+
+**Alert load and operations.** ~45 triage items/day, each with a one-sentence explanation of *which* behaviour was abnormal (e.g. "uploads 197.7 MB at 04:00; this account normally sends 2 MB at that hour"). Scoring one full day takes under a second on a laptop. Profiles are per account, never per person; alerts never reach HR or management before a confirmed compromise.
+
+**Next steps.** (1) Two-week shadow deployment alongside the existing rule, alerts grouped per account per day, change-log feed connected. (2) Recalibrate thresholds monthly on reviewed history; keep a frozen "incident-capable" reference so no one who learns our smoothing factor gets a free channel. (3) Purple-team debrief for the mimicry scenario, then commission the designed non-anomaly controls above. (4) DPO sign-off pack attached (purpose, retention, access, fairness review).
